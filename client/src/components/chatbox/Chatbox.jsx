@@ -5,15 +5,17 @@ import useSendMessage from "../../hooks/useSendMessage";
 import useGetMessages from "../../hooks/useGetMessages";
 import { useAuthContext } from "../../context/AuthContext";
 import useListenMessages from "../../hooks/useListenMessages";
+import useConvertToBase64 from "../../hooks/useConvertToBase64";
 
 const Chatbox = () => {
   const { selectedConversation, setSelectedConversation } = useConversation();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ message: "", image: "" });
   const { loading, sendMessage } = useSendMessage();
   useListenMessages();
   const { authUser } = useAuthContext();
   const { loadingMessages, messages } = useGetMessages();
-  console.log(messages);
+  const { convertBase64 } = useConvertToBase64();
+
   useEffect(() => {
     return () => setSelectedConversation(null);
   }, [setSelectedConversation]);
@@ -25,7 +27,13 @@ const Chatbox = () => {
       return;
     }
     await sendMessage(message);
-    setMessage("");
+    setMessage({ message: "", image: "" });
+  };
+
+  const convertToBase64 = (e) => {
+    const file = e.target.files[0];
+    const base64 = convertBase64(file);
+    setMessage({ message: message.message, image: base64 });
   };
 
   return (
@@ -40,7 +48,11 @@ const Chatbox = () => {
                 </h1>
                 <div className="overflow-auto h-96 w-full bg-gray-100 p-4 rounded-lg">
                   {loadingMessages ? (
-                    <p>loading...</p>
+                    messages.length === 0 ? (
+                      <p className="text-sm text-gray-500">Begin converation</p>
+                    ) : (
+                      <p>loading...</p>
+                    )
                   ) : (
                     messages.map((message) => (
                       <div
@@ -49,12 +61,30 @@ const Chatbox = () => {
                       >
                         {message.senderId === authUser._id ? (
                           <p>
-                            <b> {authUser.username} </b>: {message.message}{" "}
+                            <b>
+                              {" "}
+                              <i>{authUser.username} </i>
+                            </b>
+                            : {message.message}{" "}
+                            {message.image && (
+                              <img
+                                src={message.image}
+                                alt="message"
+                                className="w-20 h-20"
+                              />
+                            )}
                           </p>
                         ) : (
                           <p>
                             <b>{selectedConversation.username} </b>:{" "}
-                            {message.message}{" "}
+                            {message.message}
+                            {message.image && (
+                              <img
+                                src={message.image}
+                                alt="message"
+                                className="w-20 h-20"
+                              />
+                            )}
                           </p>
                         )}
                       </div>
@@ -68,8 +98,18 @@ const Chatbox = () => {
                     type="text"
                     placeholder="Type a message"
                     className="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) =>
+                      setMessage({
+                        message: e.target.value,
+                        image: message.image,
+                      })
+                    }
+                    value={message.message}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={convertToBase64}
                   />
                   <button
                     type="submit"

@@ -9,7 +9,9 @@ import messageRoutes from "./routes/messages.routes.js";
 import userRoutes from "./routes/users.routes.js";
 import { app, server } from "./socket/socket.js";
 dotenv.config();
-
+import bodyParser from "body-parser";
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());

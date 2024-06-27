@@ -14,6 +14,7 @@ const Navbar = () => {
             class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0"
             href="/"
           >
+            <img src="/YoruChat_logo.png" alt="logo" class="w-16 h-16" />
             <span class="ml-3 text-xl">YoruChat</span>
           </a>
           <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
