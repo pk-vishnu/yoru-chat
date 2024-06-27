@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import useConversation from "../../store/userConversation";
+import useConversation from "../../store/useConversation";
 import useSendMessage from "../../hooks/useSendMessage";
 import useGetMessages from "../../hooks/useGetMessages";
 import { useAuthContext } from "../../context/AuthContext";
 import useListenMessages from "../../hooks/useListenMessages";
 import useConvertToBase64 from "../../hooks/useConvertToBase64";
+import useEncryptMessage from "../../hooks/useEncryptMessage";
+import useDecryptMessage from "../../hooks/useDecryptMessage";
 
 const Chatbox = () => {
   const { selectedConversation, setSelectedConversation } = useConversation();
@@ -15,19 +17,34 @@ const Chatbox = () => {
   const { authUser } = useAuthContext();
   const { loadingMessages, messages } = useGetMessages();
   const { convertBase64 } = useConvertToBase64();
+  const { encryptMessage } = useEncryptMessage();
+  const { decryptMessage } = useDecryptMessage();
+  const [decryptedMessages, setDecryptedMessages] = useState([]);
 
   useEffect(() => {
     return () => setSelectedConversation(null);
   }, [setSelectedConversation]);
 
+  const receiverPublickKey = selectedConversation?.publicKey;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!message) {
+    if (!message.message) {
       toast.error("Message cannot be empty");
       return;
     }
-    await sendMessage(message);
-    setMessage({ message: "", image: "" });
+
+    try {
+      const encryptedMessage = await encryptMessage(
+        message.message,
+        receiverPublickKey
+      );
+      await sendMessage({ message: encryptedMessage, image: message.image });
+      setMessage({ message: "", image: "" });
+    } catch (error) {
+      console.error("Error sending encrypted message:", error);
+      toast.error("Failed to send message");
+    }
   };
 
   const convertToBase64 = (e) => {
@@ -48,6 +65,31 @@ const Chatbox = () => {
     e.target.value = null;
   };
 
+  useEffect(() => {
+    const decryptAndFilterMessages = async () => {
+      try {
+        const decrypted = await Promise.all(
+          messages.map(async (message) => {
+            if (message.senderId !== authUser._id) {
+              const decryptedMessage = await decryptMessage(message.message);
+              return {
+                ...message,
+                message: decryptedMessage, // Update the message field with decrypted content
+              };
+            } else {
+              return message; // Return the message as is if senderId matches authUser._id
+            }
+          })
+        );
+        setDecryptedMessages(decrypted);
+      } catch (error) {
+        console.error("Error decrypting messages:", error);
+      }
+    };
+
+    decryptAndFilterMessages();
+  }, [messages, authUser._id]);
+
   return (
     <>
       <div>
@@ -66,7 +108,7 @@ const Chatbox = () => {
                       <p>loading...</p>
                     )
                   ) : (
-                    messages.map((message) => (
+                    decryptedMessages.map((message) => (
                       <div
                         key={message._id}
                         className={"p-2 my-2 bg-gray-200 mr-auto rounded-tr-lg"}

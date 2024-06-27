@@ -1,5 +1,5 @@
 import React from "react";
-import useConversation from "../../store/userConversation";
+import useConversation from "../../store/useConversation";
 import useGetConversations from "../../hooks/useGetConversations";
 import Chatbox from "../chatbox/Chatbox";
 const Users = () => {
