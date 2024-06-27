@@ -5,7 +5,10 @@ const Footer = () => {
     <>
       <footer class="text-gray-600 body-font fixed bottom-0 left-0 w-full">
         <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-          <a class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
+          <a
+            class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900"
+            href="/"
+          >
             <span class="ml-2 text-xl">YoruChat</span>
           </a>
           <p class="text-sm text-gray-500 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:mt-0 mt-4">
@@ -20,7 +23,7 @@ const Footer = () => {
             </a>
           </p>
           <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-            <a class="ml-3 text-gray-500">
+            <a class="ml-3 text-gray-500" href="/">
               <svg
                 fill="currentColor"
                 stroke="currentColor"
@@ -37,7 +40,7 @@ const Footer = () => {
                 <circle cx="4" cy="4" r="2" stroke="none"></circle>
               </svg>
             </a>
-            <a class="ml-3 text-gray-500">
+            <a class="ml-3 text-gray-500" href="/">
               <svg
                 fill="currentColor"
                 stroke="currentColor"
