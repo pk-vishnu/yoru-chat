@@ -4,12 +4,13 @@ import useConversation from "../../store/userConversation";
 import useSendMessage from "../../hooks/useSendMessage";
 import useGetMessages from "../../hooks/useGetMessages";
 import { useAuthContext } from "../../context/AuthContext";
+import useListenMessages from "../../hooks/useListenMessages";
 
 const Chatbox = () => {
   const { selectedConversation, setSelectedConversation } = useConversation();
   const [message, setMessage] = useState("");
   const { loading, sendMessage } = useSendMessage();
-
+  useListenMessages();
   const { authUser } = useAuthContext();
   const { loadingMessages, messages } = useGetMessages();
   console.log(messages);
@@ -48,11 +49,12 @@ const Chatbox = () => {
                       >
                         {message.senderId === authUser._id ? (
                           <p>
-                            {authUser.username} : {message.message}{" "}
+                            <b> {authUser.username} </b>: {message.message}{" "}
                           </p>
                         ) : (
                           <p>
-                            {selectedConversation.username} : {message.message}{" "}
+                            <b>{selectedConversation.username} </b>:{" "}
+                            {message.message}{" "}
                           </p>
                         )}
                       </div>

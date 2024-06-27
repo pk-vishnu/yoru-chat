@@ -9,20 +9,6 @@ const Users = () => {
     <>
       <div className="flex w-full h-screen">
         <div className="w-1/3 p-4 overflow-auto mx-20">
-          <form className="flex items-center w-3/4 mx-auto mt-10">
-            <input
-              type="text"
-              placeholder="Search users"
-              className="w-full px-4 py-2 border border-gray-300 rounded-l focus:outline-none focus:border-slate-800"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-slate-800 text-white rounded-r hover:bg-gray-400 transition duration-200 flex items-center"
-            >
-              <p>Search</p>
-            </button>
-          </form>
-
           <h1 className="text-2xl font-bold text-center mt-10">
             Conversations
           </h1>
