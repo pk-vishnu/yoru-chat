@@ -31,9 +31,21 @@ const Chatbox = () => {
   };
 
   const convertToBase64 = (e) => {
+    console.log("File input change event:", e);
     const file = e.target.files[0];
-    const base64 = convertBase64(file);
-    setMessage({ message: message.message, image: base64 });
+    if (file) {
+      console.log("File selected:", file);
+      convertBase64(file, (base64) => {
+        if (!base64) {
+          toast.error("Error converting image");
+          return;
+        }
+        setMessage({ message: message.message, image: base64 });
+      });
+    } else {
+      console.log("No file selected");
+    }
+    e.target.value = null;
   };
 
   return (
@@ -111,6 +123,13 @@ const Chatbox = () => {
                     accept="image/*"
                     onChange={convertToBase64}
                   />
+                  {message.image && (
+                    <img
+                      src={message.image}
+                      alt="message"
+                      className="w-20 h-20"
+                    />
+                  )}
                   <button
                     type="submit"
                     className="bg-slate-800 text-white p-2 rounded-r-lg hover:bg-gray-400"

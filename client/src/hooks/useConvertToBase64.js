@@ -1,15 +1,17 @@
-import { useState } from "react";
 const useConvertToBase64 = () => {
-  const [base64Image, setBase64Image] = useState("");
-  const convertBase64 = (file) => {
+  const convertBase64 = (file, callback) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      setBase64Image(reader.result);
+      const base64String = reader.result;
+      callback(base64String);
     };
-    return base64Image;
+    reader.onerror = (error) => {
+      console.error("Error converting file to base64:", error);
+    };
   };
-  return { base64Image, convertBase64 };
+
+  return { convertBase64 };
 };
 
 export default useConvertToBase64;
