@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import useConversation from "../../store/userConversation";
 import useSendMessage from "../../hooks/useSendMessage";
-import toast from "react-hot-toast";
+import useGetMessages from "../../hooks/useGetMessages";
+import { useAuthContext } from "../../context/AuthContext";
+
 const Chatbox = () => {
   const { selectedConversation, setSelectedConversation } = useConversation();
   const [message, setMessage] = useState("");
   const { loading, sendMessage } = useSendMessage();
+
+  const { authUser } = useAuthContext();
+  const { loadingMessages, messages } = useGetMessages();
+  console.log(messages);
   useEffect(() => {
     return () => setSelectedConversation(null);
   }, [setSelectedConversation]);
@@ -30,8 +37,27 @@ const Chatbox = () => {
                 <h1 className="text-xl font-bold mb-2">
                   Chatting with {selectedConversation.username}
                 </h1>
-                <div className="bg-gray-100 p-3 rounded-lg mb-4 py-48">
-                  Messages appear here
+                <div className="overflow-auto h-96 w-full bg-gray-100 p-4 rounded-lg">
+                  {loadingMessages ? (
+                    <p>loading...</p>
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message._id}
+                        className={"p-2 my-2 bg-gray-200 mr-auto rounded-tr-lg"}
+                      >
+                        {message.senderId === authUser._id ? (
+                          <p>
+                            {authUser.username} : {message.message}{" "}
+                          </p>
+                        ) : (
+                          <p>
+                            {selectedConversation.username} : {message.message}{" "}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
               <form className="p-4" onSubmit={handleSubmit}>
