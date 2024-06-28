@@ -9,6 +9,8 @@ export const sendMessage = async (req, res) => {
     const message = req.body.message.message;
     const senderId = req.user._id;
     const image = req.body.message.image;
+    const messageEncrypted = req.body.message.myMessage;
+    const iv = req.body.message.iv;
     let conversation = await Conversation.findOne({
       participants: { $all: [receieverId, senderId] },
     });
@@ -23,6 +25,8 @@ export const sendMessage = async (req, res) => {
       senderId,
       receieverId,
       message,
+      messageEncrypted,
+      iv,
       image,
     });
 

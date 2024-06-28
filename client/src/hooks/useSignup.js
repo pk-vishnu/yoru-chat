@@ -38,6 +38,18 @@ const useSignup = () => {
       );
       localStorage.setItem("privateKey", privateKeyBase64);
 
+      // For symmetric encryption
+      const myKey = await window.crypto.subtle.generateKey(
+        {
+          name: "AES-GCM",
+          length: 256,
+        },
+        true,
+        ["encrypt", "decrypt"]
+      );
+      const jwk = await window.crypto.subtle.exportKey("jwk", myKey);
+      localStorage.setItem("myKey", JSON.stringify(jwk));
+
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {

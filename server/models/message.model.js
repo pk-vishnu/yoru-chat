@@ -15,6 +15,12 @@ const messageSchema = new mongoose.Schema(
     message: {
       type: String,
     },
+    messageEncrypted: {
+      type: String,
+    },
+    iv: {
+      type: String,
+    },
     image: {
       type: String,
     },

@@ -8,6 +8,8 @@ import useListenMessages from "../../hooks/useListenMessages";
 import useConvertToBase64 from "../../hooks/useConvertToBase64";
 import useEncryptMessage from "../../hooks/useEncryptMessage";
 import useDecryptMessage from "../../hooks/useDecryptMessage";
+import useSymmetricEncryption from "../../hooks/useSymmetricEncryption";
+import useSymmetricDecryption from "../../hooks/useSymmetricDecryption";
 
 const Chatbox = () => {
   const { selectedConversation, setSelectedConversation } = useConversation();
@@ -20,7 +22,8 @@ const Chatbox = () => {
   const { encryptMessage } = useEncryptMessage();
   const { decryptMessage } = useDecryptMessage();
   const [decryptedMessages, setDecryptedMessages] = useState([]);
-
+  const { symmetricEncrypt } = useSymmetricEncryption();
+  const { symmetricDecrypt } = useSymmetricDecryption();
   useEffect(() => {
     return () => setSelectedConversation(null);
   }, [setSelectedConversation]);
@@ -33,13 +36,21 @@ const Chatbox = () => {
       toast.error("Message cannot be empty");
       return;
     }
-
     try {
       const encryptedMessage = await encryptMessage(
         message.message,
         receiverPublickKey
       );
-      await sendMessage({ message: encryptedMessage, image: message.image });
+      const sentMessage = await symmetricEncrypt(message.message);
+      const myMessage = sentMessage.encryptedData;
+      const iv = sentMessage.iv;
+
+      await sendMessage({
+        message: encryptedMessage,
+        image: message.image,
+        myMessage: myMessage,
+        iv: iv,
+      });
       setMessage({ message: "", image: "" });
     } catch (error) {
       console.error("Error sending encrypted message:", error);
@@ -65,30 +76,38 @@ const Chatbox = () => {
     e.target.value = null;
   };
 
-  useEffect(() => {
-    const decryptAndFilterMessages = async () => {
-      try {
-        const decrypted = await Promise.all(
-          messages.map(async (message) => {
-            if (message.senderId !== authUser._id) {
-              const decryptedMessage = await decryptMessage(message.message);
-              return {
-                ...message,
-                message: decryptedMessage, // Update the message field with decrypted content
-              };
-            } else {
-              return message; // Return the message as is if senderId matches authUser._id
-            }
-          })
-        );
-        setDecryptedMessages(decrypted);
-      } catch (error) {
-        console.error("Error decrypting messages:", error);
-      }
-    };
+  useEffect(
+    () => {
+      const decryptAndFilterMessages = async () => {
+        try {
+          const decrypted = await Promise.all(
+            messages.map(async (message) => {
+              if (message.senderId !== authUser._id) {
+                const decryptedMessage = await decryptMessage(message.message);
+                return {
+                  ...message,
+                  message: decryptedMessage, // Update the message field with decrypted content
+                };
+              } else {
+                const decryptedMessage = await symmetricDecrypt(
+                  message.messageEncrypted,
+                  message.iv
+                );
+                return { ...message, message: decryptedMessage };
+              } // Return the message as is if senderId matches authUser._id
+            })
+          );
+          setDecryptedMessages(decrypted);
+        } catch (error) {
+          console.error("Error decrypting messages:", error);
+        }
+      };
 
-    decryptAndFilterMessages();
-  }, [messages, authUser._id]);
+      decryptAndFilterMessages();
+    },
+    [messages, authUser._id],
+    symmetricDecrypt
+  );
 
   return (
     <>
